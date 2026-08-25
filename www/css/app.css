@@ -1,0 +1,136 @@
+/* app.css — Squire 투두(안드로이드). PC의 templates/todo.html 스타일을 이식하고
+ * 모바일(터치·좁은 화면·상단 탭)에 맞게 보강했다. 색/톤은 PC와 동일하게 유지. */
+:root{--bg:#0f1115;--card:#171a21;--line:#252a34;--ink:#e6e9ef;--muted:#8a91a0;--accent:#4f8cff;--ok:#3ecf8e;--warn:#ffb454}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);
+     font-family:"Segoe UI",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+     padding:0 0 24px;-webkit-tap-highlight-color:transparent;
+     padding-top:env(safe-area-inset-top);}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 90px}
+h1{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+
+/* 상단 탭(할 일 / 설정) */
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:6px;background:var(--bg);
+      padding:10px 14px;border-bottom:1px solid var(--line);
+      padding-top:calc(10px + env(safe-area-inset-top))}
+.tab{flex:1;text-align:center;background:var(--card);border:1px solid var(--line);
+     border-radius:10px;padding:11px 8px;font-size:14px;color:var(--muted);cursor:pointer;
+     font-family:inherit}
+.tab.active{color:#fff;border-color:var(--accent);background:rgba(79,140,255,.14)}
+
+.screen{display:none}
+.screen.active{display:block}
+
+.synced{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--card);
+        border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:12.5px;color:var(--muted);margin-bottom:14px}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:10px 15px;font-size:13.5px;
+     cursor:pointer;font-family:inherit}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn:active{filter:brightness(1.12)}
+.btn:disabled{opacity:.55}
+.msg{background:rgba(79,140,255,.12);border:1px solid var(--accent);border-radius:10px;padding:9px 13px;
+     font-size:13px;margin-bottom:14px}
+.msg.warn{background:rgba(255,93,93,.12);border-color:#ff5d5d}
+
+form.add{display:flex;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);
+         border-radius:14px;padding:14px;margin-bottom:18px}
+form.add input[type=text]{flex:1 1 240px;background:#0f1115;border:1px solid var(--line);border-radius:9px;
+         color:var(--ink);padding:11px 12px;font-size:15px;font-family:inherit}
+input[type=date]{background:#0f1115;border:1px solid var(--line);border-radius:9px;color:var(--ink);
+         padding:10px;font-family:inherit;font-size:14px}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.75}
+input[type=time]{background:#0f1115;border:1px solid var(--line);border-radius:9px;color:var(--ink);
+         padding:10px;font-family:inherit;font-size:14px}
+input[type=time]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.75}
+form.add .add-note{flex:1 1 100%;background:#0f1115;border:1px solid var(--line);
+         border-radius:9px;color:var(--ink);padding:10px 12px;font-family:inherit;font-size:13.5px;line-height:1.5;resize:vertical}
+select{background:#0f1115;border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:10px;font-family:inherit;font-size:14px}
+
+ul.todo{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+li.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.item-row{display:flex;align-items:flex-start;gap:12px}
+.item-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:5px}
+.meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.item-side{flex:0 0 auto;display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.item-side .tag{text-align:center}
+.item-side .del,.item-side .edit{width:100%}
+li.item.done .txt{text-decoration:line-through;color:var(--muted)}
+li.item.due-today{border-color:#ffd166;box-shadow:0 0 0 1px #ffd166,0 0 16px rgba(255,209,102,.22)}
+li.item.due-today .txt{color:#ffe08a;font-weight:700}
+.badge-today{font-size:10.5px;font-weight:700;color:#1a1400;background:#ffd166;border-radius:20px;padding:2px 8px;white-space:nowrap}
+li.item.overdue{border-color:#ff5d5d;box-shadow:0 0 0 1px #ff5d5d,0 0 16px rgba(255,93,93,.22)}
+li.item.overdue .txt{color:#ff9a9a;font-weight:700}
+.badge-overdue{font-size:10.5px;font-weight:700;color:#2a0000;background:#ff5d5d;border-radius:20px;padding:2px 8px;white-space:nowrap}
+.badge-recur{font-size:10.5px;font-weight:700;border-radius:20px;padding:2px 8px;white-space:nowrap}
+.badge-recur.weekly{color:#06251a;background:#3ecf8e}
+.badge-recur.monthly{color:#1c0f33;background:#b98cff}
+.badge-bell{font-size:10.5px;color:var(--muted)}
+
+.recur-opt{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap}
+.recur-opt input{accent-color:var(--accent);width:16px;height:16px}
+.recur-detail{flex:1 1 100%;display:none;align-items:center;flex-wrap:wrap;gap:8px;
+              background:rgba(79,140,255,.06);border:1px dashed var(--line);border-radius:9px;padding:8px 11px}
+.recur-detail.open{display:flex}
+.rd-label{font-size:12.5px;color:var(--muted)}
+.wd-opt{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--ink);cursor:pointer;
+        border:1px solid var(--line);border-radius:8px;padding:5px 10px;user-select:none}
+.wd-opt input{accent-color:var(--accent);width:14px;height:14px;margin:0}
+.dom-input{width:70px;background:#0f1115;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 9px;font-family:inherit;font-size:13px}
+.created{font-size:11px;color:var(--muted);white-space:nowrap}
+.chk{width:24px;height:24px;border-radius:6px;border:1.5px solid var(--line);background:transparent;cursor:pointer;
+     flex:0 0 24px;display:flex;align-items:center;justify-content:center;color:var(--ok);font-size:14px;padding:0}
+li.item.done .chk{border-color:var(--ok);background:rgba(62,207,142,.12)}
+.txt{flex:1;font-size:14.5px;word-break:break-word;cursor:pointer;user-select:none}
+.note-ind{font-size:12px;opacity:.85}
+.note-panel,.edit-panel{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.note-panel.open,.edit-panel.open{display:block}
+.note-panel textarea,.edit-panel textarea{width:100%;min-height:72px;resize:vertical;background:#0f1115;
+     border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:9px 11px;font-family:inherit;font-size:13.5px;line-height:1.5}
+.note-save{margin-top:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 15px;font-size:13px;cursor:pointer;font-family:inherit}
+.note-hint{font-size:11.5px;color:var(--muted);margin:0 0 6px}
+.tag{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+.tag.업무{color:var(--accent);border-color:rgba(79,140,255,.5)}
+.tag.개인{color:var(--warn);border-color:rgba(255,180,84,.5)}
+.due{font-size:11.5px;color:var(--muted)}
+.del{background:none;border:1px solid var(--line);color:#c3cad6;cursor:pointer;font-size:12px;padding:6px 11px;border-radius:8px;font-family:inherit;white-space:nowrap}
+.del:active{color:#fff;background:#ff5d5d;border-color:#ff5d5d}
+.edit{background:none;border:1px solid var(--line);color:#c3cad6;cursor:pointer;font-size:12px;padding:6px 11px;border-radius:8px;font-family:inherit;white-space:nowrap}
+.edit:active{color:#fff;background:var(--accent);border-color:var(--accent)}
+.edit-panel .edit-fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.edit-panel input[type=text]{flex:1 1 200px;background:#0f1115;border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:10px 11px;font-family:inherit;font-size:14.5px}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+.archive-wrap{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}
+.archive-head{font-size:14px;font-weight:700;color:var(--muted);margin:0 0 12px}
+.arch-sub{font-weight:400;font-size:11.5px;color:var(--muted)}
+.archive{padding:10px 0}
+.archive + .archive{border-top:1px dashed var(--line)}
+.archive summary{cursor:pointer;color:var(--ink);font-size:13.5px;font-weight:600;user-select:none;list-style:none}
+.archive summary::-webkit-details-marker{display:none}
+.archive summary::before{content:'▸ ';color:var(--muted)}
+.archive[open] summary::before{content:'▾ '}
+.arch-count{font-weight:400;font-size:11.5px;color:var(--muted);margin-left:4px}
+
+/* 설정 화면 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 4px}
+.card p.hint{font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.5}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:none}
+.row .label{font-size:13.5px}
+.row .label small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+/* 토글 스위치 */
+.switch{position:relative;width:50px;height:28px;flex:0 0 auto}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#2b3140;border-radius:20px;transition:.2s;cursor:pointer}
+.slider::before{content:"";position:absolute;height:22px;width:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:var(--accent)}
+.switch input:checked + .slider::before{transform:translateX(22px)}
+.time-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* 하단 고정 '추가' FAB 대신 상단 폼 사용 — 토스트 */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);
+       background:#232838;color:var(--ink);border:1px solid var(--line);border-radius:10px;
+       padding:11px 18px;font-size:13.5px;opacity:0;transition:.25s;z-index:50;max-width:88%}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}

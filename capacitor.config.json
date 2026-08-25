@@ -1,0 +1,11 @@
+{
+  "appId": "com.squire.todo",
+  "appName": "Squire 할 일",
+  "webDir": "www",
+  "backgroundColor": "#0f1115",
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#4f8cff"
+    }
+  }
+}
