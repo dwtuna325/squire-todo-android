@@ -1,0 +1,108 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node 20 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Java 17 설정(Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK 설정
+        uses: android-actions/setup-android@v3
+
+      - name: 의존성 설치
+        run: npm install
+
+      - name: 안드로이드 플랫폼 추가
+        run: npx cap add android
+
+      - name: 매니페스트 패치(OAuth 스킴)
+        run: node scripts/patch-android.mjs
+
+      - name: 웹 자산 동기화
+        run: npx cap sync android
+
+      - name: 서명키 준비(있으면)
+        id: keystore
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > android/app/squire.keystore
+            echo "have_keystore=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "have_keystore=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ ANDROID_KEYSTORE_BASE64 시크릿 없음 → debug APK만 빌드합니다(드라이브 OAuth는 release 서명 필요)."
+          fi
+
+      - name: Gradle 실행 권한
+        run: chmod +x android/gradlew
+
+      - name: Release APK 빌드(서명키 있음)
+        if: steps.keystore.outputs.have_keystore == 'true'
+        working-directory: android
+        env:
+          KS_PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PW: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease
+          BT=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)
+          UNSIGNED=app/build/outputs/apk/release/app-release-unsigned.apk
+          "$ANDROID_HOME/build-tools/$BT/zipalign" -f -v 4 "$UNSIGNED" app/build/outputs/apk/release/squire-todo-aligned.apk
+          "$ANDROID_HOME/build-tools/$BT/apksigner" sign \
+            --ks app/squire.keystore \
+            --ks-pass env:KS_PW \
+            --ks-key-alias "$KEY_ALIAS" \
+            --key-pass env:KEY_PW \
+            --out app/build/outputs/apk/release/squire-todo.apk \
+            app/build/outputs/apk/release/squire-todo-aligned.apk
+          "$ANDROID_HOME/build-tools/$BT/apksigner" verify app/build/outputs/apk/release/squire-todo.apk
+
+      - name: Debug APK 빌드(서명키 없음)
+        if: steps.keystore.outputs.have_keystore == 'false'
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: 서명키 SHA-1 지문 출력(OAuth 등록용)
+        if: steps.keystore.outputs.have_keystore == 'true'
+        env:
+          KS_PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          keytool -list -v -keystore android/app/squire.keystore -storepass "$KS_PW" -alias "$KEY_ALIAS" | grep -A1 "SHA1:" || true
+
+      - name: APK 업로드(release)
+        if: steps.keystore.outputs.have_keystore == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-todo-apk
+          path: android/app/build/outputs/apk/release/squire-todo.apk
+          if-no-files-found: error
+
+      - name: APK 업로드(debug)
+        if: steps.keystore.outputs.have_keystore == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: squire-todo-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
