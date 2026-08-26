@@ -10,8 +10,19 @@
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
-const SCHEME = 'com.squire.todo';
 const MANIFEST = 'android/app/src/main/AndroidManifest.xml';
+
+// OAuth 리다이렉트 스킴을 gconfig.js(단일 출처)에서 뽑는다 → gconfig만 고치면 매니페스트도 따라감.
+function readScheme() {
+  const g = readFileSync('www/js/gconfig.js', 'utf8');
+  const m = /redirectUri:\s*["']([^"':]+):/.exec(g); // "<scheme>:/oauth2redirect" 의 <scheme>
+  if (!m) {
+    console.error('✗ gconfig.js 에서 redirectUri 스킴을 못 읽음');
+    process.exit(1);
+  }
+  return m[1];
+}
+const SCHEME = readScheme();
 
 if (!existsSync(MANIFEST)) {
   console.error('✗ AndroidManifest.xml 없음: ' + MANIFEST + ' — 먼저 `npx cap add android` 실행');

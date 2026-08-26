@@ -10,10 +10,12 @@
  *   2) 아래 clientId 에 발급된 값 붙여넣기
  */
 window.GCONFIG = {
-  // 예: "1234567890-abcdefg.apps.googleusercontent.com"
-  clientId: "YOUR_ANDROID_OAUTH_CLIENT_ID.apps.googleusercontent.com",
-  // 커스텀 스킴 리다이렉트(앱 딥링크). 안드로이드 매니페스트/‑build 설정과 일치해야 함.
-  redirectUri: "com.squire.todo:/oauth2redirect",
+  // Google Cloud Console → 클라이언트(Android). 시크릿 없음·공개값이라 커밋 OK.
+  clientId: "1017849585642-k4i5c2o64oc4l9d9orj60gcvdb4dk4cc.apps.googleusercontent.com",
+  // Android 클라이언트는 **역순 클라이언트 ID 스킴**을 리다이렉트로 쓴다(구글이 이 형태만 허용).
+  // = "com.googleusercontent.apps." + (클라이언트ID에서 .apps.googleusercontent.com 앞부분)
+  // 이 스킴은 scripts/patch-android.mjs 가 AndroidManifest intent-filter로 자동 등록한다.
+  redirectUri: "com.googleusercontent.apps.1017849585642-k4i5c2o64oc4l9d9orj60gcvdb4dk4cc:/oauth2redirect",
   // 드라이브 전체 스코프 — PC가 만든 Squire-Sync/todos.json 을 찾으려면 필요(drive.file로는 안 보임)
   scope: "https://www.googleapis.com/auth/drive"
 };
