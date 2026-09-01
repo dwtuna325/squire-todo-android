@@ -79,6 +79,29 @@ const future = new Date(today.getFullYear(), today.getMonth(), today.getDate() +
 S.wakeDueRecurring(null, future);
 ok(S.load().items[0].done === false, '도래일 도달 → 다시 할 일로 부활');
 
+// 7b) 반복 도래 시 마감일(due)도 한 주기 앞당김 (주간 +7일)
+mem['squire.todos'] = '';
+const wk2 = S.add({ text: '고정팟 일정픽스', recur: 'weekly', recur_days: [0], due: '2026-09-02' });
+S.toggleDone(wk2.id);
+eq(S.load().items[0].due, '2026-09-02', '완료 직후엔 마감일 그대로');
+S.wakeDueRecurring(null, new Date(2026, 8, 7)); // 2026-09-07(월) 도래
+eq(S.load().items[0].due, '2026-09-09', '주간 도래 → 마감일 +7일');
+ok(S.load().items[0].done === false, '도래로 다시 할 일');
+
+// 7c) 여러 주기 밀렸으면 오늘 이후가 될 때까지 catch-up
+mem['squire.todos'] = '';
+const wk3 = S.add({ text: '밀린 주간업무', recur: 'weekly', recur_days: [0], due: '2026-09-02' });
+S.toggleDone(wk3.id);
+S.wakeDueRecurring(null, new Date(2026, 8, 28)); // 9/2→9/9→9/16→9/23→9/30
+eq(S.load().items[0].due, '2026-09-30', '밀린 주기 catch-up → 오늘 이후 첫 마감일');
+
+// 7d) 월간 도래 시 마감일 +1개월
+mem['squire.todos'] = '';
+const mo2 = S.add({ text: '월세납부', recur: 'monthly', recur_dom: 5, due: '2026-09-05' });
+S.toggleDone(mo2.id);
+S.wakeDueRecurring(null, new Date(2026, 9, 5)); // 2026-10-05
+eq(S.load().items[0].due, '2026-10-05', '월간 도래 → 마감일 +1개월');
+
 // 8) 반복(월간): 매월 dom
 mem['squire.todos'] = '';
 const mo = S.add({ text: '월세', recur: 'monthly', recur_dom: 5 });

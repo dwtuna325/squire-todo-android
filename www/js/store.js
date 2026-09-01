@@ -278,6 +278,16 @@
         it.done = false;
         delete it.done_at;
         delete it.wake_at;
+        // 반복 도래 → 마감일(due)도 한 주기(주간 +7일 / 월간 +1개월) 뒤로 이동.
+        // 오래 안 열어 여러 주기가 밀렸으면 오늘 이후가 될 때까지 반복해서 앞당긴다.
+        var due = it.due ? parseYmd(it.due) : null;
+        if (due) {
+          var recur = normRecur(it.recur);
+          do {
+            due = recur === 'monthly' ? addOneMonth(due) : addDays(due, 7);
+          } while (due.getTime() < today.getTime());
+          it.due = ymd(due);
+        }
         it.updated_at = nowIso();
         changed = true;
       }
