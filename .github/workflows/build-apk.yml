@@ -113,7 +113,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.ver.outputs.version }}
-          name: Squire 할 일 v${{ steps.ver.outputs.version }}
+          name: Squire v${{ steps.ver.outputs.version }}
           body: |
             Squire 투두 v${{ steps.ver.outputs.version }} 자동 빌드.
             폰에서 `squire-todo.apk` 를 받아 기존 앱 위에 덮어 설치하면 데이터가 유지됩니다.

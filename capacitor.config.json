@@ -1,6 +1,6 @@
 {
   "appId": "com.squire.todo",
-  "appName": "Squire 할 일",
+  "appName": "Squire",
   "webDir": "www",
   "backgroundColor": "#0f1115",
   "plugins": {
