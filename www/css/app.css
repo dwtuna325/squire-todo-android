@@ -39,6 +39,23 @@ h1{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
 #update-banner .u-actions{display:flex;gap:8px;flex-shrink:0}
 #update-banner .btn{padding:7px 12px;font-size:12.5px}
 
+/* 동기화 결과 상단 배너 */
+.msg.ok{background:rgba(62,207,142,.12);border-color:var(--ok)}
+#sync-result{display:flex;align-items:center;gap:10px;justify-content:space-between}
+#sync-result .sr-close{background:transparent;border:none;color:var(--muted);font-size:16px;
+     line-height:1;cursor:pointer;flex-shrink:0;padding:2px 4px;font-family:inherit}
+
+/* 동기화 진행중 모달 */
+.modal-overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+     background:rgba(0,0,0,.55)}
+.modal-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;
+     display:flex;flex-direction:column;align-items:center;gap:14px;min-width:170px;
+     box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.modal-text{margin:0;font-size:14px;color:var(--ink)}
+.spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);
+     border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 form.add{display:flex;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);
          border-radius:14px;padding:14px;margin-bottom:18px}
 form.add input[type=text]{flex:1 1 240px;background:#0f1115;border:1px solid var(--line);border-radius:9px;

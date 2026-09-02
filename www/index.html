@@ -22,6 +22,7 @@
     <p class="sub">업무·개인 할 일을 한곳에서. 집·회사 PC와 구글 드라이브로 동기화됩니다.</p>
 
     <div id="update-banner" class="msg" hidden></div>
+    <div id="sync-result" class="msg" hidden></div>
 
     <div class="synced">
       <span id="sync-line">☁️ 동기화: 아직 연결 안 됨 (설정에서 연결)</span>
@@ -69,6 +70,14 @@
     </div>
   </div>
 </section>
+
+<!-- 동기화 진행중 모달 -->
+<div class="modal-overlay" id="sync-overlay" hidden aria-hidden="true">
+  <div class="modal-card" role="status" aria-live="polite">
+    <div class="spinner"></div>
+    <p class="modal-text">동기화 진행 중…</p>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 

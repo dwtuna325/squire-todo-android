@@ -236,6 +236,7 @@
     if (!configured() || !isLinked()) { if (!opts.silent) toast('먼저 구글 계정을 연결하세요.'); return; }
     if (syncing) { _dirty = true; return; }
     syncing = true;
+    if (!opts.silent) showSyncProgress();
     var when = new Date();
     var out = { ok: false, count: null, error: null, when: fmt(when) };
     try {
@@ -250,8 +251,8 @@
         S.replaceAll(merged);
         if (global.renderTodos) global.renderTodos();
         out.error = '계좌번호로 보이는 항목이 있어 동기화를 멈췄습니다. 해당 할 일에서 번호를 지운 뒤 다시 시도하세요.';
-        saveStatus(out); refreshSettings();
-        if (!opts.silent) toast(out.error);
+        saveStatus(out); refreshSettings(); updateTodoSyncLine();
+        if (!opts.silent) { hideSyncProgress(); showSyncResult(out); }
         syncing = false; return;
       }
 
@@ -261,14 +262,13 @@
       if (global.Notify && global.Notify.rescheduleAll) global.Notify.rescheduleAll();
       out.ok = true;
       out.count = (merged.items || []).filter(function (i) { return !i.deleted; }).length;
-      if (!opts.silent) toast('동기화 완료 · 항목 ' + out.count + '개');
     } catch (e) {
       out.error = (e && e.message) || String(e);
-      if (!opts.silent) toast('동기화 실패: ' + out.error);
     }
     saveStatus(out);
     refreshSettings();
     updateTodoSyncLine();
+    if (!opts.silent) { hideSyncProgress(); showSyncResult(out); }
     syncing = false;
     if (_dirty) { _dirty = false; syncNow({ silent: true }); }
   }
@@ -283,6 +283,38 @@
 
   // ───────────────────────── UI 연동 ─────────────────────────
   function toast(m) { if (global.toastMsg) global.toastMsg(m); }
+
+  // 동기화 진행중 모달(‘지금 동기화’ 등 수동 동기화에서만)
+  function showSyncProgress() {
+    var o = document.getElementById('sync-overlay');
+    if (o) { o.hidden = false; o.setAttribute('aria-hidden', 'false'); }
+    var r = document.getElementById('sync-result');
+    if (r) r.hidden = true; // 이전 결과는 숨기고 시작
+  }
+  function hideSyncProgress() {
+    var o = document.getElementById('sync-overlay');
+    if (o) { o.hidden = true; o.setAttribute('aria-hidden', 'true'); }
+  }
+  // 동기화 결과를 상단 배너에 출력(성공=초록·6초 후 자동사라짐 / 실패=빨강·수동 닫기)
+  var _srTimer = null;
+  function showSyncResult(out) {
+    var box = document.getElementById('sync-result');
+    if (!box) return;
+    box.className = 'msg' + (out.ok ? ' ok' : ' warn');
+    box.innerHTML = '';
+    var span = document.createElement('span');
+    span.textContent = out.ok
+      ? ('✅ 동기화 완료 · 항목 ' + out.count + '개 · ' + out.when)
+      : ('⚠️ 동기화 실패 — ' + (out.error || '알 수 없는 오류'));
+    var close = document.createElement('button');
+    close.type = 'button'; close.className = 'sr-close'; close.textContent = '✕';
+    close.setAttribute('aria-label', '닫기');
+    close.addEventListener('click', function () { box.hidden = true; });
+    box.appendChild(span); box.appendChild(close);
+    box.hidden = false;
+    if (_srTimer) { clearTimeout(_srTimer); _srTimer = null; }
+    if (out.ok) _srTimer = setTimeout(function () { box.hidden = true; }, 6000);
+  }
   function refreshSettings() {
     var scr = document.getElementById('screen-settings');
     if (scr && scr.classList.contains('active') && global.Settings && global.Settings.render) global.Settings.render();
