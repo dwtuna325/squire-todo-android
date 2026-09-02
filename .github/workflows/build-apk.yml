@@ -13,25 +13,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 소스 체크아웃
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 앱 버전 읽기(package.json → 단일 출처)
         id: ver
         run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
       - name: Node 20 설정
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '20'
 
       - name: Java 17 설정(Temurin)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Android SDK 설정
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: 의존성 설치
         run: npm install
@@ -102,7 +102,7 @@ jobs:
 
       - name: APK 업로드(release, 아티팩트)
         if: steps.keystore.outputs.have_keystore == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: squire-todo-apk
           path: android/app/build/outputs/apk/release/squire-todo.apk
@@ -110,7 +110,7 @@ jobs:
 
       - name: GitHub Release 게시(앱 최신버전 확인·다운로드 배포처)
         if: steps.keystore.outputs.have_keystore == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           name: Squire 할 일 v${{ steps.ver.outputs.version }}
@@ -122,7 +122,7 @@ jobs:
 
       - name: APK 업로드(debug)
         if: steps.keystore.outputs.have_keystore == 'false'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: squire-todo-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
