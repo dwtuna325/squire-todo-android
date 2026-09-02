@@ -52,3 +52,30 @@ if (xml.includes('android:scheme="' + SCHEME + '"')) {
   writeFileSync(MANIFEST, xml, 'utf8');
   console.log('✓ OAuth 스킴 intent-filter 추가됨 (' + SCHEME + ')');
 }
+
+// ── 앱 버전 주입: package.json version → build.gradle versionName / versionCode ──
+// `cap add android` 가 생성한 build.gradle 은 versionCode 1·versionName "1.0" 로 고정이라,
+// 여기서 단일 출처(package.json)와 CI 빌드번호로 덮어써 업데이트가 항상 상위 버전으로 잡히게 한다.
+// versionName = 사용자 표시/최신비교용, versionCode = 안드로이드 설치 판정용(단조 증가 필수).
+const GRADLE = 'android/app/build.gradle';
+if (existsSync(GRADLE)) {
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+  const versionName = pkg.version;
+  // CI 빌드번호(GITHUB_RUN_NUMBER)가 있으면 그걸로, 없으면 버전에서 파생(x*10000+y*100+z).
+  const parts = String(versionName).split('.').map((n) => parseInt(n, 10) || 0);
+  const derived = (parts[0] || 0) * 10000 + (parts[1] || 0) * 100 + (parts[2] || 0);
+  const versionCode = parseInt(process.env.GITHUB_RUN_NUMBER || '', 10) || derived || 1;
+
+  let g = readFileSync(GRADLE, 'utf8');
+  const before = g;
+  g = g.replace(/versionCode\s+\d+/, 'versionCode ' + versionCode);
+  g = g.replace(/versionName\s+"[^"]*"/, 'versionName "' + versionName + '"');
+  if (g !== before) {
+    writeFileSync(GRADLE, g, 'utf8');
+    console.log('✓ 버전 주입: versionName ' + versionName + ' / versionCode ' + versionCode);
+  } else {
+    console.error('⚠️ build.gradle 에서 versionCode/versionName 패턴을 못 찾음 — 템플릿 변경?');
+  }
+} else {
+  console.log('· build.gradle 없음(로컬 매니페스트-only 실행) — 버전 주입 건너뜀');
+}

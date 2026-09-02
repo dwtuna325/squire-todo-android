@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write   # GitHub Release 생성(앱 자동 업데이트 확인용 배포처)
 
 jobs:
   build:
@@ -14,6 +14,10 @@ jobs:
     steps:
       - name: 소스 체크아웃
         uses: actions/checkout@v4
+
+      - name: 앱 버전 읽기(package.json → 단일 출처)
+        id: ver
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
       - name: Node 20 설정
         uses: actions/setup-node@v4
@@ -35,7 +39,12 @@ jobs:
       - name: 안드로이드 플랫폼 추가
         run: npx cap add android
 
-      - name: 매니페스트 패치(OAuth 스킴)
+      - name: 앱 버전 주입(웹 version.js)
+        run: node scripts/gen-version.mjs
+
+      - name: 매니페스트 패치(OAuth 스킴) + 네이티브 버전 주입
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: node scripts/patch-android.mjs
 
       - name: 웹 자산 동기화
@@ -91,13 +100,25 @@ jobs:
         run: |
           keytool -list -v -keystore android/app/squire.keystore -storepass "$KS_PW" -alias "$KEY_ALIAS" | grep -A1 "SHA1:" || true
 
-      - name: APK 업로드(release)
+      - name: APK 업로드(release, 아티팩트)
         if: steps.keystore.outputs.have_keystore == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: squire-todo-apk
           path: android/app/build/outputs/apk/release/squire-todo.apk
           if-no-files-found: error
+
+      - name: GitHub Release 게시(앱 최신버전 확인·다운로드 배포처)
+        if: steps.keystore.outputs.have_keystore == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: Squire 할 일 v${{ steps.ver.outputs.version }}
+          body: |
+            Squire 투두 v${{ steps.ver.outputs.version }} 자동 빌드.
+            폰에서 `squire-todo.apk` 를 받아 기존 앱 위에 덮어 설치하면 데이터가 유지됩니다.
+          files: android/app/build/outputs/apk/release/squire-todo.apk
+          fail_on_unmatched_files: true
 
       - name: APK 업로드(debug)
         if: steps.keystore.outputs.have_keystore == 'false'

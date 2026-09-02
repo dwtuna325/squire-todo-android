@@ -21,6 +21,8 @@
     <h1>📝 To Do</h1>
     <p class="sub">업무·개인 할 일을 한곳에서. 집·회사 PC와 구글 드라이브로 동기화됩니다.</p>
 
+    <div id="update-banner" class="msg" hidden></div>
+
     <div class="synced">
       <span id="sync-line">☁️ 동기화: 아직 연결 안 됨 (설정에서 연결)</span>
       <button class="btn" id="btn-sync-now" type="button" hidden>🔄 지금 동기화</button>
@@ -70,11 +72,13 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="js/version.js"></script>
 <script src="js/store.js"></script>
 <script src="js/notifications.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/gconfig.js"></script>
 <script src="js/drive.js"></script>
 <script src="js/app.js"></script>
+<script src="js/update.js"></script>
 </body>
 </html>

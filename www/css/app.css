@@ -34,6 +34,11 @@ h1{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
      font-size:13px;margin-bottom:14px}
 .msg.warn{background:rgba(255,93,93,.12);border-color:#ff5d5d}
 
+/* 새 버전 알림 배너 */
+#update-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between}
+#update-banner .u-actions{display:flex;gap:8px;flex-shrink:0}
+#update-banner .btn{padding:7px 12px;font-size:12.5px}
+
 form.add{display:flex;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);
          border-radius:14px;padding:14px;margin-bottom:18px}
 form.add input[type=text]{flex:1 1 240px;background:#0f1115;border:1px solid var(--line);border-radius:9px;
