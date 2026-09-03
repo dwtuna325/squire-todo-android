@@ -269,7 +269,7 @@
         if (global.renderTodos) global.renderTodos();
         out.error = '계좌번호로 보이는 항목이 있어 동기화를 멈췄습니다. 해당 할 일에서 번호를 지운 뒤 다시 시도하세요.';
         saveStatus(out); refreshSettings(); updateTodoSyncLine();
-        if (!opts.silent) { hideSyncProgress(); showSyncResult(out); }
+        if (!opts.silent) finishSyncUi(out);
         syncing = false; return;
       }
 
@@ -285,7 +285,7 @@
     saveStatus(out);
     refreshSettings();
     updateTodoSyncLine();
-    if (!opts.silent) { hideSyncProgress(); showSyncResult(out); }
+    if (!opts.silent) finishSyncUi(out);
     syncing = false;
     if (_dirty) { _dirty = false; syncNow({ silent: true }); }
   }
@@ -302,7 +302,10 @@
   function toast(m) { if (global.toastMsg) global.toastMsg(m); }
 
   // 동기화 진행중 모달(‘지금 동기화’ 등 수동 동기화에서만)
+  var MIN_MODAL_MS = 650;        // 동기화가 순식간에 끝나도 모달이 잠깐은 보이게 최소 표시시간
+  var _modalShownAt = 0;
   function showSyncProgress() {
+    _modalShownAt = Date.now();
     var o = document.getElementById('sync-overlay');
     if (o) { o.hidden = false; o.setAttribute('aria-hidden', 'false'); }
     var r = document.getElementById('sync-result');
@@ -311,6 +314,12 @@
   function hideSyncProgress() {
     var o = document.getElementById('sync-overlay');
     if (o) { o.hidden = true; o.setAttribute('aria-hidden', 'true'); }
+  }
+  // 모달을 최소 표시시간만큼 유지한 뒤 닫고 결과 배너를 띄운다(빠른 동기화도 진행중이 보이게).
+  function finishSyncUi(out) {
+    var elapsed = Date.now() - _modalShownAt;
+    var wait = Math.max(0, MIN_MODAL_MS - elapsed);
+    setTimeout(function () { hideSyncProgress(); showSyncResult(out); }, wait);
   }
   // 동기화 결과를 상단 배너에 출력(성공=초록·6초 후 자동사라짐 / 실패=빨강·수동 닫기)
   var _srTimer = null;
