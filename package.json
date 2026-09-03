@@ -1,6 +1,6 @@
 {
   "name": "squire-todo",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Squire 투두 — 안드로이드 앱(집·회사 PC와 구글 드라이브로 동기화, 마감일 로컬 알림)",
   "private": true,
   "scripts": {
@@ -9,17 +9,20 @@
     "add:android": "cap add android",
     "patch:android": "node scripts/patch-android.mjs",
     "gen:version": "node scripts/gen-version.mjs",
+    "icons": "node scripts/make-icons.mjs",
     "open:android": "cap open android"
   },
   "dependencies": {
     "@capacitor/android": "6.1.2",
+    "@capacitor/app": "6.0.1",
+    "@capacitor/browser": "6.0.3",
     "@capacitor/core": "6.1.2",
     "@capacitor/local-notifications": "6.1.0",
-    "@capacitor/preferences": "6.0.2",
-    "@capacitor/app": "6.0.1",
-    "@capacitor/browser": "6.0.3"
+    "@capacitor/preferences": "6.0.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "6.1.2"
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "6.1.2",
+    "sharp": "^0.35.4"
   }
 }

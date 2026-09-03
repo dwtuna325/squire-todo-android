@@ -39,6 +39,9 @@ jobs:
       - name: 안드로이드 플랫폼 추가
         run: npx cap add android
 
+      - name: 앱 아이콘 생성(방패 엠블럼 → 밀도별·어댑티브)
+        run: npx @capacitor/assets generate --android
+
       - name: 앱 버전 주입(웹 version.js)
         run: node scripts/gen-version.mjs
 
