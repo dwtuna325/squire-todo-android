@@ -7,7 +7,9 @@ android/
 # 빌드 산출물
 *.apk
 *.aab
+*.zip
 dist/
+_apk/
 
 # 서명키(절대 커밋 금지 — GitHub Secret으로만 보관)
 *.keystore
