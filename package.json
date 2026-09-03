@@ -1,6 +1,6 @@
 {
   "name": "squire-todo",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Squire 투두 — 안드로이드 앱(집·회사 PC와 구글 드라이브로 동기화, 마감일 로컬 알림)",
   "private": true,
   "scripts": {

@@ -13,7 +13,7 @@
   var REPO = global.APP_REPO || 'dwtuna325/squire-todo-android';
   var CURRENT = global.APP_VERSION || '0.0.0';
   var DISMISS_KEY = 'squire.update.dismissed';   // 사용자가 '닫기'한 버전
-  var CHECK_TTL_MS = 6 * 60 * 60 * 1000;          // 조회 최소 간격(6시간) — API 예의상
+  var CHECK_TTL_MS = 30 * 60 * 1000;              // 포그라운드 복귀 재확인 최소 간격(30분). 앱 시작(cold start)은 항상 확인.
   var CHECK_TS_KEY = 'squire.update.lastcheck';
 
   // ── 버전 비교(간단 semver) — "v1.2.0"·"1.2"·"1.2.0-beta" 허용. 숫자 세그먼트만 비교 ──
@@ -103,7 +103,14 @@
 
   function nowMs() { try { return Date.now(); } catch (e) { return 0; } }
 
-  function init() { check(false); }
+  function init() {
+    check(true); // 앱 시작(cold start)마다 무조건 1회 최신버전 확인
+    // 포그라운드로 돌아올 때도 재확인(30분 throttle) — 켜둔 채 새 릴리스가 나와도 곧 알림.
+    var App = global.Capacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.App;
+    if (App && App.addListener) {
+      try { App.addListener('appStateChange', function (st) { if (st && st.isActive) check(false); }); } catch (e) {}
+    }
+  }
 
   global.Update = { init: init, check: check, _cmpVer: cmpVer, _parseVer: parseVer };
 
