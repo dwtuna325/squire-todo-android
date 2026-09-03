@@ -34,6 +34,23 @@
   function isNative() { return !!(global.Capacitor && global.Capacitor.isNativePlatform && global.Capacitor.isNativePlatform()); }
   function configured() { return CFG.clientId && CFG.clientId.indexOf('YOUR_') !== 0; }
 
+  // 네트워크가 멈춰도 동기화가 무한 대기(모달 안 닫힘)하지 않도록 타임아웃 fetch.
+  function timedFetch(url, opts, ms) {
+    opts = opts || {};
+    ms = ms || 30000;
+    if (typeof AbortController === 'undefined') return fetch(url, opts); // 구형 폴백
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, ms);
+    opts.signal = ctrl.signal;
+    return fetch(url, opts).then(
+      function (r) { clearTimeout(timer); return r; },
+      function (e) {
+        clearTimeout(timer);
+        throw (e && e.name === 'AbortError') ? new Error('네트워크 응답 시간 초과(30초)') : e;
+      }
+    );
+  }
+
   // ───────────────────────── 상태 저장 ─────────────────────────
   function loadAuth() { try { return JSON.parse(global.localStorage.getItem(AUTH_KEY) || '{}'); } catch (e) { return {}; } }
   function saveAuth(a) { global.localStorage.setItem(AUTH_KEY, JSON.stringify(a || {})); }
@@ -139,7 +156,7 @@
       refresh_token: auth.refresh_token,
       grant_type: 'refresh_token'
     });
-    var res = await fetch(TOKEN_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() });
+    var res = await timedFetch(TOKEN_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() });
     var tok = await res.json();
     if (!res.ok) throw new Error('토큰 갱신 실패: ' + (tok.error || res.status));
     auth.access_token = tok.access_token;
@@ -153,7 +170,7 @@
     var t = await accessToken();
     opts = opts || {};
     opts.headers = Object.assign({ Authorization: 'Bearer ' + t }, opts.headers || {});
-    return fetch(url, opts);
+    return timedFetch(url, opts);
   }
 
   // ───────────────────────── 드라이브 헬퍼 ─────────────────────────

@@ -2,6 +2,9 @@
  * 모바일(터치·좁은 화면·상단 탭)에 맞게 보강했다. 색/톤은 PC와 동일하게 유지. */
 :root{--bg:#0f1115;--card:#171a21;--line:#252a34;--ink:#e6e9ef;--muted:#8a91a0;--accent:#4f8cff;--ok:#3ecf8e;--warn:#ffb454}
 *{box-sizing:border-box}
+/* hidden 속성은 항상 숨김이 이기게(클래스/ID의 display:flex 가 [hidden] 을 덮어써
+   모달·배너가 안 닫히던 버그 방지). */
+[hidden]{display:none !important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);
      font-family:"Segoe UI",system-ui,-apple-system,"Malgun Gothic",sans-serif;
